@@ -1,0 +1,995 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APUS Banner Tool - Enhanced</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="html2canvas.js"></script>
+    <!-- Add JSZip library for creating zip files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<style>
+    :root {
+        --width: 1200px;
+        --height: 400px;
+    }
+
+    @font-face {
+        font-family: 'Gibson';
+        src: url('https://cdn.glitch.global/0ed4663c-8c44-42a2-b06a-7dc68c5cb8d8/Gibson-Regular.otf?v=1747715994390') format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Gibson-Bold';
+        src: url('https://cdn.glitch.global/0ed4663c-8c44-42a2-b06a-7dc68c5cb8d8/Gibson-Bold.otf?v=1747715962494') format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Gibson-SemiBold';
+        src: url('https://cdn.glitch.global/0ed4663c-8c44-42a2-b06a-7dc68c5cb8d8/Gibson-SemiBold.otf?v=1747716000518') format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Gibson-Light';
+        src: url('https://cdn.glitch.global/0ed4663c-8c44-42a2-b06a-7dc68c5cb8d8/Gibson-Light.otf?v=1747715985309') format('opentype');
+    }
+
+    body {
+        background-color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    .wrapper {
+        max-width: var(--width);
+        width: 100%;
+        margin: auto;
+    }
+
+    #image {
+        width: var(--width);
+        height: var(--height);
+        background-color: white;
+        margin: 20px auto;
+        font-family: 'Gibson', sans-serif;
+        background-color: #ddd;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.33);
+    }
+
+    canvas {
+        margin: 15px auto;
+        display: block;
+        width: var(--width);
+        position: absolute;
+        margin-left: -5000px;
+    }
+
+    #form {
+        margin: 10px;
+    }
+
+    a {
+        color: blue;
+    }
+
+    .centerText {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 4;
+    }
+
+    .text {
+        padding: 10px 30px;
+        box-sizing: border-box;
+        z-index: 4;
+        position: relative;
+        width: auto;
+        text-align: center;
+    }
+
+    #smallTitle {
+        font-size: 1em;
+        color: #777;
+        padding: 0;
+        margin: 10px 0px 0px 0px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Gibson', sans-serif;
+    }
+
+    #mainTitle {
+        font-size: 2em;
+        line-height: 1.1em;
+        padding: 0;
+        margin: 0;
+        margin: 0px 0px 10px 0px;
+        font-family: 'Gibson', sans-serif;
+        color: black;
+        text-align: center;
+    }
+
+    #ctaTitle {
+        font-size: 1.2em;
+        text-transform: uppercase;
+        font-weight: 500;
+        text-align: center;
+        padding: 10px 10px;
+        box-sizing: border-box;
+        margin: 0;
+        font-family: 'Gibson', sans-serif;
+    }
+
+    label {
+        color: black;
+        display: inline-block;
+        margin: 5px 0;
+    }
+
+    .file-upload:hover {
+        cursor: pointer;
+    }
+
+    #outputImage {
+        width: var(--width);
+        height: var(--height);
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        right: 0;
+    }
+
+    #cta {
+        background-color: #004C97;
+        color: white;
+        border-bottom: solid 8px;
+        border-bottom-color: #041E42;
+        padding: 5px;
+        margin-top: 30px;
+        max-width: 325px;
+        width: 100%;
+        display: inline-block;
+    }
+
+    #preview {
+        max-width: 200px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    #imageBackground {
+        background-image: none;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: skyblue;
+        height: 100%;
+        width: 100%;
+        min-width: var(--width);
+        min-height: var(--height);
+        position: absolute;
+    }
+
+    .download-btn {
+        cursor: pointer;
+        padding: 10px 15px;
+        background-color: #004C97;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        margin-right: 10px;
+        margin-bottom: 20px;
+    }
+
+    .hide-scrollbar {
+        overflow: -moz-hidden-unscrollable;
+        overflow: hidden;
+    }
+
+    /* Additional styles for resized image preview */
+    #preview {
+        max-width: 200px;
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .logo {
+        max-width: 200px;
+        width: 100%;
+        height: auto;
+        z-index: 1000;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-image: url('logos/logo.png');
+        background-size: 100%;
+        background-repeat: no-repeat;
+        min-height: 48px;
+        display: block;
+    }
+
+    .disabled-text {
+        color: #aaa;
+    }
+
+    /* Define styles for different font sizes */
+    .regular {
+        font-size: 2em !important;
+    }
+
+    .large {
+        font-size: 3em !important;
+    }
+
+    .xlarge {
+        font-size: 5em !important;
+    }
+
+    /* Blue banner style for learning materials and assessments */
+    .blue-banner {
+        background-color: #004C97;
+        color: white;
+    }
+
+    .blue-banner #mainTitle,
+    .blue-banner #smallTitle {
+        color: white !important;
+    }
+
+    /* Batch generation section */
+    .batch-section {
+        margin: 30px 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+    }
+
+    .batch-section h3 {
+        margin-top: 0;
+    }
+
+    .image-container {
+        width: 100%;
+        max-width: 200px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .checkbox-group {
+        margin: 15px 0;
+    }
+
+    .size-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    .size-controls input {
+        width: 80px;
+    }
+
+    .progress-container {
+        display: none;
+        margin-top: 20px;
+    }
+
+    .progress-bar {
+        height: 20px;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background-color: #004C97;
+        border-radius: 5px;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    /* Upload button styling */
+    .custom-file-upload {
+        display: inline-block;
+        padding: 8px 12px;
+        cursor: pointer;
+        background-color: #004C97;
+        color: white;
+        border-radius: 4px;
+        margin: 5px 0;
+    }
+
+    .custom-file-upload input {
+        display: none;
+    }
+
+    /* Form styling */
+    input[type="text"],
+    input[type="number"] {
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    /* Toggle for batch mode */
+    .toggle-container {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        border-left: 4px solid #004C97;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.toggle-slider {
+        background-color: #004C97;
+    }
+
+    input:checked+.toggle-slider:before {
+        transform: translateX(26px);
+    }
+
+    .batch-options {
+        margin-top: 15px;
+        display: none;
+    }
+
+    .form-row {
+        margin-bottom: 10px;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .input-group label {
+        margin: 0;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        // Set initial banner size
+        var size = {
+            width: 1200,
+            height: 400
+        };
+        // Store background image
+        var backgroundImage = null;
+        // Update banner size when inputs change
+        $('#bannerWidth, #bannerHeight').on('change', function() {
+            size.width = parseInt($('#bannerWidth').val()) || 1200;
+            size.height = parseInt($('#bannerHeight').val()) || 400;
+            document.documentElement.style.setProperty('--width', size.width + 'px');
+            document.documentElement.style.setProperty('--height', size.height + 'px');
+            // Refresh preview
+            updatePreview();
+        });
+        // Toggle batch mode options
+        $('#batchMode').change(function() {
+            if ($(this).is(':checked')) {
+                $('.batch-options').slideDown();
+                $('#downloadSingle').text('Generate & Download Zip');
+            } else {
+                $('.batch-options').slideUp();
+                $('#downloadSingle').text('Download Banner');
+            }
+        });
+        // BANNER CONTROLS
+        $('#blueBanner').click(function() {
+            if ($('input.blueBanner').is(':checked')) {
+                $('#imageBackground').css('background-color', '#004C97');
+                $('#imageBackground').css('background-image', 'none');
+                $('#mainTitle, #smallTitle').css('color', 'white');
+            } else {
+                $('#imageBackground').css('background-color', 'skyblue');
+                $('#mainTitle').css('color', 'black');
+                $('#smallTitle').css('color', '#777');
+                // Restore background image if one was uploaded
+                if (backgroundImage) {
+                    $('#imageBackground').css('background-image', 'url(' + backgroundImage + ')');
+                }
+            }
+            updatePreview();
+        });
+        $('#invert').click(function() {
+            if ($('input.invert').is(':checked')) {
+                $('#mainTitle').css('color', 'white');
+                $('#smallTitle').css('color', 'white');
+            } else {
+                $('#mainTitle').css('color', 'black');
+                $('#smallTitle').css('color', '#777');
+            }
+            updatePreview();
+        });
+        $('#hideLogo').click(function() {
+            if ($('input.hideLogo').is(':checked')) {
+                $('.logo').css('display', 'none');
+            } else {
+                $('.logo').css('display', 'block');
+            }
+            updatePreview();
+        });
+        $('#titleSize').on('change', function() {
+            var selectedValue = $(this).val();
+            $('#mainTitle').removeClass('regular large xlarge');
+            $('#mainTitle').addClass(selectedValue);
+            updatePreview();
+        });
+        
+        // Handle image upload - fixed to avoid tainted canvas
+        $('#getval').change(function() {
+            var file = $('#getval')[0].files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    // Store the data URL
+                    backgroundImage = e.target.result;
+                    // Set preview
+                    $('#preview').attr('src', backgroundImage);
+                    // Set background image
+                    $('#imageBackground').css('background-image', 'url(' + backgroundImage + ')');
+                    // If blue banner is active, deactivate it
+                    if ($('input.blueBanner').is(':checked')) {
+                        $('input.blueBanner').prop('checked', false);
+                        $('#imageBackground').css('background-color', 'skyblue');
+                        $('#mainTitle').css('color', 'black');
+                        $('#smallTitle').css('color', '#777');
+                    }
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        // Update preview
+        function updatePreview() {
+            // No need to create a canvas preview here, we'll just show the actual banner
+        }
+        // Banner title and text updates
+        $('#getTitle').keyup(function() {
+            $('#mainTitle').text($(this).val());
+        });
+        $('#getSmallTitle').keyup(function() {
+            $('#smallTitle').text($(this).val());
+        });
+        $('#getCTA').keyup(function() {
+            $('#ctaTitle').text($(this).val());
+            if ($(this).val() == '') {
+                $('#cta').css('display', 'none');
+            } else {
+                $('#cta').css('display', 'block');
+            }
+        });
+        // Convert number to word (1 -> "One", etc.)
+        function numberToWord(num) {
+            const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+                'Ten',
+                'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen',
+                'Nineteen', 'Twenty'
+            ];
+            if (num <= 20) return words[num];
+            return num.toString(); // Return the number as a string if > 20
+        }
+        // Download single banner or generate batch
+        $('#downloadSingle').click(function() {
+            if ($('#batchMode').is(':checked')) {
+                generateBatchBanners();
+            } else {
+                downloadSingleBanner();
+            }
+        });
+        // Function to download a single banner
+        function downloadSingleBanner() {
+            if ($('#getName').val() == '') {
+                $('#getName').css('border-color', 'red');
+                alert('Please Enter a File Name');
+                return;
+            }
+            $('#getName').css('border-color', 'initial');
+            // Create a banner using our custom drawing function
+            createBannerImage($('#image')[0]).then(function(blob) {
+                // Create download link
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = $('#getName').val() + '.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }).catch(function(error) {
+                console.error('Error generating banner:', error);
+                alert('There was an error generating the banner. Please try again.');
+            });
+        }
+        // Function to create a banner image directly (without html2canvas)
+        function createBannerImage(element) {
+            return new Promise(function(resolve, reject) {
+                try {
+                    // Create a canvas
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    // Set canvas dimensions
+                    canvas.width = size.width;
+                    canvas.height = size.height;
+                    // Draw background color
+                    ctx.fillStyle = $('#imageBackground').css('background-color');
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    // Draw background image if exists
+                    if (backgroundImage && !$('input.blueBanner').is(':checked')) {
+                        var img = new Image();
+                        img.crossOrigin = "Anonymous";
+                        img.onload = function() {
+                            console.log("Background image loaded successfully");
+                            // Draw background image
+                            var bgPosX = 0;
+                            var bgPosY = 0;
+                            // Calculate scale to cover the canvas (like CSS background-size: cover)
+                            var scale = Math.max(canvas.width / img.width, canvas.height / img
+                                .height);
+                            var scaledWidth = img.width * scale;
+                            var scaledHeight = img.height * scale;
+                            // Center the image (default position)
+                            var bgPosX = (canvas.width - scaledWidth) / 2;
+                            var bgPosY = (canvas.height - scaledHeight) / 2;
+                            
+                            // Draw the image with proper positioning
+                            ctx.drawImage(img, bgPosX, bgPosY, scaledWidth, scaledHeight);
+                            // Continue with the rest of the drawing
+                            drawBannerContents();
+                        };
+                        img.onerror = function(err) {
+                            console.error('Error loading background image:', err);
+                            // Continue without the background image
+                            drawBannerContents();
+                        };
+                        // Set the source last to trigger the load
+                        img.src = backgroundImage;
+                    } else {
+                        // Continue without background image
+                        drawBannerContents();
+                    }
+
+                    function drawBannerContents() {
+                        // Draw text
+                        ctx.save();
+                        // Set text properties
+                        if ($('input.blueBanner').is(':checked') || $('input.invert').is(':checked')) {
+                            ctx.fillStyle = 'white';
+                        } else {
+                            ctx.fillStyle = 'black';
+                        }
+                        var fontSizeMain = 32; // Default size
+                        if ($('#mainTitle').hasClass('large')) {
+                            fontSizeMain = 48;
+                        } else if ($('#mainTitle').hasClass('xlarge')) {
+                            fontSizeMain = 80;
+                        }
+                        // Draw main title
+                        ctx.font = fontSizeMain + 'px Gibson, Arial, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        var mainTitle = $('#mainTitle').text();
+                        var textX = canvas.width / 2;
+                        var textY = canvas.height / 2 - 30;
+                        ctx.fillText(mainTitle, textX, textY);
+                        // Draw small title
+                        if ($('#smallTitle').text()) {
+                            if ($('input.blueBanner').is(':checked')) {
+                                ctx.fillStyle = 'white';
+                            } else if ($('input.invert').is(':checked')) {
+                                ctx.fillStyle = 'white';
+                            } else {
+                                ctx.fillStyle = '#777';
+                            }
+                            ctx.font = '16px Gibson, Arial, sans-serif';
+                            ctx.fillText($('#smallTitle').text(), textX, textY - 40);
+                        }
+                        // Draw CTA if visible
+                        if ($('#cta').css('display') !== 'none') {
+                            var ctaText = $('#ctaTitle').text();
+                            var ctaWidth = 325;
+                            var ctaHeight = 50;
+                            var ctaX = textX - ctaWidth / 2;
+                            var ctaY = textY + 60;
+                            // CTA background
+                            ctx.fillStyle = '#004C97';
+                            if ($('input.whiteCTA').is(':checked')) {
+                                ctx.fillStyle = '#eee';
+                            }
+                            ctx.fillRect(ctaX, ctaY, ctaWidth, ctaHeight - 8);
+                            // CTA border
+                            ctx.fillStyle = '#041E42';
+                            if ($('input.whiteCTA').is(':checked')) {
+                                ctx.fillStyle = '#ddd';
+                            }
+                            ctx.fillRect(ctaX, ctaY + ctaHeight - 8, ctaWidth, 8);
+                            // CTA text
+                            ctx.fillStyle = 'white';
+                            if ($('input.whiteCTA').is(':checked')) {
+                                ctx.fillStyle = '#004C97';
+                            }
+                            ctx.font = 'bold 19px Gibson, Arial, sans-serif';
+                            ctx.fillText(ctaText, textX, ctaY + 20);
+                        }
+                        // Draw logo if not hidden (SIMPLIFIED: Use the same approach as original)
+                        if ($('.logo').css('display') !== 'none') {
+                            // Try to load and draw the actual logo image
+                            var logoImg = new Image();
+                            logoImg.crossOrigin = "Anonymous";
+                            logoImg.onload = function() {
+                                // Logo loaded successfully, draw it
+                                var logoWidth = 150;
+                                var logoHeight = 30;
+                                var logoX = canvas.width - logoWidth - 20;
+                                var logoY = canvas.height - logoHeight - 20;
+                                ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight);
+                                finalizeBanner();
+                            };
+                            logoImg.onerror = function() {
+                                // Logo failed to load, use text fallback
+                                ctx.fillStyle = '#FFFFFF';
+                                ctx.font = 'bold 20px Arial, sans-serif';
+                                ctx.textAlign = 'right';
+                                ctx.textBaseline = 'bottom';
+                                ctx.fillText('APUS', canvas.width - 20, canvas.height - 20);
+                                finalizeBanner();
+                            };
+                            // Set the logo source (same as in CSS)
+                            logoImg.src = 'https://cdn.glitch.global/0ed4663c-8c44-42a2-b06a-7dc68c5cb8d8/thumbnails%2Flogo-white.png?1747715932034';
+                        } else {
+                            finalizeBanner();
+                        }
+
+                        function finalizeBanner() {
+                            // Convert canvas to blob and resolve
+                            canvas.toBlob(function(blob) {
+                                resolve(blob);
+                            }, 'image/jpeg', 0.95);
+                        }
+                        ctx.restore();
+                    }
+                } catch (err) {
+                    console.error("Error in createBannerImage:", err);
+                    reject(err);
+                }
+            });
+        }
+        // Function to generate batch banners
+        function generateBatchBanners() {
+            // Validate inputs
+            var baseTitle = $('#getTitle').val();
+            if (!baseTitle) {
+                alert('Please enter a base title');
+                $('#getTitle').focus();
+                return;
+            }
+            // Only create one folder with background images if available
+            var useBackgroundImage = $('#useBackgroundImage').is(':checked') && backgroundImage;
+            if (!useBackgroundImage) {
+                alert('Please select "Use background image" and upload a background image to generate banners');
+                return;
+            }
+            var startUnit = parseInt($('#startUnit').val()) || 1;
+            var endUnit = parseInt($('#endUnit').val()) || 8;
+            if (startUnit > endUnit) {
+                alert('Start unit number must be less than or equal to end unit number');
+                return;
+            }
+            // Show progress bar
+            $('.progress-container').show();
+            $('.progress-fill').css('width', '0%');
+            $('#progressText').text('Preparing to generate banners...');
+            // Save current banner state
+            var originalState = {
+                mainTitle: $('#mainTitle').text(),
+                smallTitle: $('#smallTitle').text(),
+                ctaTitle: $('#ctaTitle').text(),
+                backgroundImage: backgroundImage,
+                backgroundColor: $('#imageBackground').css('background-color'),
+                backgroundImageCSS: $('#imageBackground').css('background-image'),
+                mainTitleColor: $('#mainTitle').css('color'),
+                smallTitleColor: $('#smallTitle').css('color'),
+                blueBannerChecked: $('input.blueBanner').is(':checked'),
+                invertChecked: $('input.invert').is(':checked')
+            };
+            // Create zip instance
+            var zip = new JSZip();
+            var totalBanners = 0;
+            var completedBanners = 0;
+            // Calculate total number of banners to be generated
+            var unitCount = endUnit - startUnit + 1;
+            // Only generate banners with background image
+            totalBanners = unitCount;
+            // Update progress text
+            $('#progressText').text('Preparing to generate ' + totalBanners + ' banners...');
+            // Generate banners one by one
+            var promises = [];
+            var spellOutNumbers = $('#spellOutNumbers').is(':checked');
+            // Generate banners with background image
+            for (var unit = startUnit; unit <= endUnit; unit++) {
+                (function(currentUnit) {
+                    var unitText = spellOutNumbers ? numberToWord(currentUnit) : currentUnit.toString();
+                    var title = baseTitle + " " + unitText;
+                    // Create a promise for each banner
+                    var promise = new Promise(function(resolve, reject) {
+                        setTimeout(function() {
+                            // Configure banner for image background (FIXED: Ensure proper state)
+                            $('#mainTitle').text(title);
+                            $('#smallTitle').text($('#getSmallTitle').val());
+                            // Set background image and ensure overlay is visible
+                            $('#imageBackground').css({
+                                'background-color': 'skyblue',
+                                'background-image': 'url(' + backgroundImage + ')'
+                            });
+                            // Only set colors to black if invert is not checked
+                            if (!$('input.invert').is(':checked')) {
+                                $('#mainTitle').css('color', 'black');
+                                $('#smallTitle').css('color', '#777');
+                            }
+                            // Ensure checkboxes are in correct state for batch generation
+                            $('input.blueBanner').prop('checked', false);
+                            // Generate banner
+                            createBannerImage($('#image')[0])
+                                .then(function(blob) {
+                                    var fileName = "banner_" + currentUnit + ".jpg";
+                                    zip.file(fileName, blob);
+                                    completedBanners++;
+                                    updateProgress(completedBanners, totalBanners);
+                                    resolve(currentUnit);
+                                })
+                                .catch(function(error) {
+                                    console.error('Error generating banner for unit ' +
+                                        currentUnit + ':', error);
+                                    reject(error);
+                                });
+                        }, 100 * (currentUnit - startUnit)); // Small delay between generations
+                    });
+                    promises.push(promise);
+                })(unit);
+            }
+            // Update progress bar
+            function updateProgress(completed, total) {
+                var progress = (completed / total) * 100;
+                $('.progress-fill').css('width', progress + '%');
+                $('#progressText').text('Generated ' + completed + ' of ' + total + ' banners...');
+                // Check if all banners are generated
+                if (completed >= total) {
+                    // Generate and download the zip file
+                    $('#progressText').text('Creating zip file...');
+                    zip.generateAsync({
+                        type: 'blob'
+                    }).then(function(content) {
+                        var zipFileName = $('#getName').val() || 'unit_banners';
+                        saveAs(content, zipFileName + '.zip');
+                        $('#progressText').text('Download complete!');
+                        // Restore original banner state
+                        restoreOriginalState(originalState);
+                        // Hide progress bar after a delay
+                        setTimeout(function() {
+                            $('.progress-container').hide();
+                        }, 3000);
+                    });
+                }
+            }
+            // Function to restore original banner state
+            function restoreOriginalState(state) {
+                $('#mainTitle').text(state.mainTitle);
+                $('#smallTitle').text(state.smallTitle);
+                $('#ctaTitle').text(state.ctaTitle);
+                // Restore background image properly
+                backgroundImage = state.backgroundImage;
+                if (backgroundImage) {
+                    $('#imageBackground').css('background-image', 'url(' + backgroundImage + ')');
+                } else {
+                    $('#imageBackground').css('background-image', 'none');
+                }
+                $('#imageBackground').css('background-color', state.backgroundColor);
+                $('#mainTitle').css('color', state.mainTitleColor);
+                $('#smallTitle').css('color', state.smallTitleColor);
+                // Restore ALL checkbox states
+                $('input.blueBanner').prop('checked', state.blueBannerChecked);
+                $('input.invert').prop('checked', state.invertChecked);
+            }
+            // Handle errors in promises
+            Promise.all(promises).catch(function(error) {
+                console.error('Error generating banners:', error);
+                alert('There was an error generating some banners. Please try again.');
+                // Restore original banner state
+                restoreOriginalState(originalState);
+                // Hide progress bar
+                $('.progress-container').hide();
+            });
+        }
+    });
+</script>
+
+<body>
+    <div class="wrapper">
+        <h1>APUS Banner Generator</h1>
+
+        <!-- Banner size controls -->
+        <div class="size-controls">
+            <label>Width:</label>
+            <input type="number" id="bannerWidth" value="1200" min="800" max="2000">
+            <label>Height:</label>
+            <input type="number" id="bannerHeight" value="400" min="200" max="800">
+        </div>
+
+        <div id="image">
+            <div class="centerText">
+                <div class="text">
+                    <p id="smallTitle">This is the small title</p>
+                    <h1 id="mainTitle">This can be a very long title if you want it to be</h1>
+                    <div id="cta">
+                        <h6 id="ctaTitle">Come See</h6>
+                    </div>
+                </div>
+            </div>
+            <div id='imageBackground'></div>
+            <div class="logo"></div>
+        </div>
+        <!--image-->
+
+        <form id="form">
+            <div class="form-row">
+                <label>Small Title</label>
+                <input type="text" id="getSmallTitle">
+            </div>
+
+            <div class="form-row">
+                <label>Title</label>
+                <input type="text" id="getTitle">
+            </div>
+
+            <div class="form-row">
+                <label for="titleSize">Title font size:</label>
+                <select name="titleSize" id="titleSize">
+                    <option value="regular">Regular</option>
+                    <option value="large">Large</option>
+                    <option value="xlarge">X Large</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label>Call To Action</label>
+                <input type="text" id="getCTA">
+            </div>
+
+            <div class="form-row">
+                <div class="input-group">
+                    <label><input type="checkbox" id="blueBanner" name="blueBanner" class="blueBanner"
+                            value="Blue Banner"> Blue Banner</label>
+                </div>
+
+                <div class="input-group">
+                    <label><input type="checkbox" id="invert" name="invert" class="invert" value="Invert">
+                        Invert</label>
+                </div>
+
+                <div class="input-group">
+                    <label><input type="checkbox" id="hideLogo" name="hideLogo" class="hideLogo" value="HideLogo"> Hide
+                        Logo</label>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="file">Upload Background Image</label>
+                <input type='file' id='getval' name="background-image" class="file-upload" />
+                <div class="image-container">
+                    <img src="" id="preview" alt="Image Preview">
+                </div>
+            </div>
+        </form>
+
+        <!-- Batch Generation Toggle -->
+        <div class="toggle-container">
+            <label class="toggle-switch">
+                <input type="checkbox" id="batchMode">
+                <span class="toggle-slider"></span>
+            </label>
+            <strong>Batch Mode</strong> - Generate multiple banners at once
+
+            <!-- Batch Options (initially hidden) -->
+            <div class="batch-options">
+                <div class="form-row">
+                    <label>Unit Range:</label>
+                    <div class="input-group">
+                        <label>Start:</label>
+                        <input type="number" id="startUnit" value="1" min="1" max="20">
+                        <label>End:</label>
+                        <input type="number" id="endUnit" value="8" min="1" max="20">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label><input type="checkbox" id="spellOutNumbers" checked> Spell out numbers (One, Two,
+                        Three...)</label>
+                </div>
+
+                <div class="form-row">
+                    <label>Banner Type:</label>
+                    <div class="input-group">
+                        <label><input type="checkbox" id="useBackgroundImage" checked> Use background image (Required
+                            for batch generation)</label>
+                    </div>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        Note: Batch mode only generates banners with background images. Upload a background image above
+                        to enable batch generation.
+                    </p>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p id="progressText">Generating banners...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>File Name</label>
+            <input type="text" id="getName">
+            <button id="downloadSingle" class="download-btn">Download Banner</button>
+        </div>
+    </div>
+</body>
+
+</html>
