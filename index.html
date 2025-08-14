@@ -241,6 +241,10 @@
         font-size: 5em !important;
     }
 
+    .xxlarge {
+        font-size: 7em !important;
+    }
+
     /* Blue banner style for learning materials and assessments */
     .blue-banner {
         background-color: #004C97;
@@ -524,7 +528,7 @@
         });
         $('#titleSize').on('change', function() {
             var selectedValue = $(this).val();
-            $('#mainTitle').removeClass('regular large xlarge');
+            $('#mainTitle').removeClass('regular large xlarge xxlarge');
             $('#mainTitle').addClass(selectedValue);
             updatePreview();
         });
@@ -709,7 +713,7 @@
                                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                                 ctx.restore();
                         }
-                        
+
                         // Continue without background image
                         drawBannerContents();
                     }
@@ -728,6 +732,8 @@
                             fontSizeMain = 48;
                         } else if ($('#mainTitle').hasClass('xlarge')) {
                             fontSizeMain = 80;
+                        } else if ($('#mainTitle').hasClass('xxlarge')) {
+                            fontSizeMain = 112;
                         }
                         // Draw main title
                         ctx.font = fontSizeMain + 'px Gibson, Arial, sans-serif';
@@ -1027,6 +1033,7 @@
                     <option value="regular">Regular</option>
                     <option value="large">Large</option>
                     <option value="xlarge">X Large</option>
+                    <option value="xxlarge">XX Large</option>
                 </select>
             </div>
 
